@@ -1,0 +1,30 @@
+name: 'env_cc_default'
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - ipykernel
+  - python=3.8
+  - matplotlib>=3.2.2
+  - scikit-learn>=1.0
+  - pandas>=1.3.*
+  - numpy
+  - requests>=2.24.0
+  - graphviz
+  - python-graphviz
+  - make
+  - pip
+  - eli5
+  - seaborn
+  - imbalanced-learn
+  - ipython>=7.15
+  - altair_saver
+  - docopt==0.6.2
+  - openpyxl==3.0.9
+  - xlrd==2.0.1
+  - altair==4.1.0
+  - portpicker==1.5.0
+  - jupyterlab==3.2.4
+  - pip:
+    - mglearn
+    - psutil>=5.7.2
