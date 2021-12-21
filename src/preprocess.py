@@ -1,5 +1,20 @@
+"""
+Preprocess raw data, split it in training and test sets and save in csv files
+
+Usage: src/preprocess.py --in_path=<in_path> --train_out_path=<train_out_path> --test_out_path=<test_out_path>
+
+Options:
+--in_path=<in_path>                 Path to the raw data
+--train_out_path=<train_out_path>   Save path to the train data
+--test_out_path=<test_out_path>     Save path to the test data
+"""
+
 import pandas as pd
+
+import os
+
 from docopt import docopt
+
 from sklearn.model_selection import train_test_split
 
 opt = docopt(__doc__)
@@ -69,6 +84,8 @@ def split_data(df):
 
 def save_data(df, path):
     # Export data to csv file
+    if not os.path.exists(os.path.dirname(path)):
+        os.makedirs(os.path.dirname(path))
     df.to_csv(path, index=False)
 
 
@@ -86,4 +103,4 @@ def main(in_path, train_out_path, test_out_path):
 
 
 if __name__ == "__main__":
-    main(opt["in_path"], opt["train_out_path"], opt["test_out_path"])
+    main(opt["--in_path"], opt["--train_out_path"], opt["--test_out_path"])

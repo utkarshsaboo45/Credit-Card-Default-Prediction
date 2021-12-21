@@ -1,0 +1,11 @@
+python src/download_data.py --url=https://archive.ics.uci.edu/ml/machine-learning-databases/00350/default%20of%20credit%20card%20clients.xls --out_file=data/raw/apple.csv
+
+python src/preprocess.py --in_path=data/raw/cc_default.csv --train_out_path=data/processed/train.csv --test_out_path=data/processed/test.csv
+
+python src/base_model.py --train_in_path=data/processed/train.csv --preprocessor_out_path=models --results_out_path=results
+
+python src/hyperparam_tuning.py --train_in_path=data/processed/train.csv --preprocessor_in_path=models/preprocessor.pkl --results_out_path=results --model_out_path=models
+
+python src/averaging_model.py --train_in_path=data/processed/train.csv --preprocessor_in_path=models/preprocessor.pkl --results_out_path=results
+
+python src/results_and_prediction.py --train_in_path=data/processed/train.csv --test_in_path=data/processed/test.csv --preprocessor_in_path=models/preprocessor.pkl --img_out_path=images

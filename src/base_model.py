@@ -1,3 +1,14 @@
+"""
+Test base models with default hyperparameters on our training data
+
+Usage: src/base_model.py --train_in_path=<train_in_path> --preprocessor_out_path=<preprocessor_out_path> --results_out_path=<results_out_path>
+
+Options:
+--train_in_path=<train_in_path>                     Path to the training data
+--preprocessor_out_path=<preprocessor_out_path>      Save path to the preprocessor object
+--results_out_path=<results_out_path>               Save path for the scores
+"""
+
 import numpy as np
 import pandas as pd
 
@@ -22,7 +33,6 @@ from catboost import CatBoostClassifier
 from lightgbm.sklearn import LGBMClassifier
 from xgboost import XGBClassifier
 
-opt = docopt(__doc__)
 
 def define_feature_types(X_train):
     categorical_features = [
@@ -63,7 +73,7 @@ def define_column_transformer(X_train,categorical_features, pass_through_feature
 
     print("Dumping Preprocessor!")
 
-    default_preprocessor_out_path = preprocessor_out_path + "preprocessor.pkl"
+    default_preprocessor_out_path = preprocessor_out_path + "/preprocessor.pkl"
     try:
         pickle.dump(preprocessor, open(default_preprocessor_out_path, "wb"))
     except:
@@ -120,6 +130,19 @@ def get_scoring_metrics():
     ]
 
 
+def get_models(preprocessor):
+    return {
+        "Dummy Classifier": make_pipeline(preprocessor, DummyClassifier()),
+        "Decision Tree": make_pipeline(preprocessor, DecisionTreeClassifier()),
+        "SVC": make_pipeline(preprocessor, SVC()),
+        "Logistic Regression": make_pipeline(preprocessor, LogisticRegression(max_iter=10000)),
+        "Random Forest": make_pipeline(preprocessor, RandomForestClassifier()),
+        "XGBoost": make_pipeline(preprocessor, XGBClassifier(verbosity=0)),
+        "LGBM": make_pipeline(preprocessor, LGBMClassifier()),
+        "CatBoost": make_pipeline(preprocessor, CatBoostClassifier(verbose=0)),
+        "Naive Bayes": make_pipeline(preprocessor, GaussianNB())
+    }
+
 def train(results, model_name, model_obj, X_train, y_train):
 
     results[model_name] = mean_std_cross_val_scores(
@@ -139,7 +162,7 @@ def save_csv(results, results_out_path, filename="/results.csv"):
     if not os.path.exists(results_out_path):
         os.makedirs(results_out_path)
 
-    pd.DataFrame(results).to_csv(results_out_path + filename, index = False, encoding="utf-8")
+    pd.DataFrame(results).to_csv(results_out_path + filename, encoding="utf-8")
 
 
 def main(train_in_path, preprocessor_out_path, results_out_path):
@@ -159,17 +182,7 @@ def main(train_in_path, preprocessor_out_path, results_out_path):
 
     results_base = {}
 
-    models = {
-        "Dummy Classifier": make_pipeline(preprocessor, DummyClassifier()),
-        "Decision Tree": make_pipeline(preprocessor, DecisionTreeClassifier()),
-        "SVC": make_pipeline(preprocessor, SVC()),
-        "Logistic Regression": make_pipeline(preprocessor, LogisticRegression(max_iter=10000)),
-        "Random Forest": make_pipeline(preprocessor, RandomForestClassifier()),
-        "XGBoost": make_pipeline(preprocessor, XGBClassifier(verbosity=0)),
-        "LGBM": make_pipeline(preprocessor, LGBMClassifier()),
-        "CatBoost": make_pipeline(preprocessor, CatBoostClassifier(verbose=0)),
-        "Naive Bayes": make_pipeline(preprocessor, GaussianNB())
-    }
+    models = get_models(preprocessor)
 
     for model_name, model in models.items():
         print("Training", model_name)
@@ -181,4 +194,5 @@ def main(train_in_path, preprocessor_out_path, results_out_path):
     print("Results saved!")
 
 if __name__ == "__main__":
-    main(opt["train_in_path"], opt["preprocessor_out_path"], opt["results_out_path"])
+    opt = docopt(__doc__)
+    main(opt["--train_in_path"], opt["--preprocessor_out_path"], opt["--results_out_path"])

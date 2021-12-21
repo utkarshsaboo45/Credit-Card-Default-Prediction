@@ -1,3 +1,14 @@
+"""
+Test averaging models on our training data
+
+Usage: src/averaging_model.py --train_in_path=<train_in_path> --preprocessor_in_path=<preprocessor_in_path> --results_out_path=<results_out_path>
+
+Options:
+--train_in_path=<train_in_path>                     Path to the training data
+--preprocessor_in_path=<preprocessor_in_path>        Path to load the preprocessor object
+--results_out_path=<results_out_path>               Save path for the scores
+"""
+
 import pandas as pd
 
 from docopt import docopt
@@ -20,9 +31,6 @@ from base_model import (
     mean_std_cross_val_scores,
     get_scoring_metrics
 )
-
-
-opt = docopt(__doc__)
 
 
 def define_models(preprocessor):
@@ -94,13 +102,13 @@ def train_averaging_models(models, results, X_train, y_train):
     return results
 
 
-def main(train_in_path, preprocessor_in_path, results_out_path, model_out_path):
+def main(train_in_path, preprocessor_in_path, results_out_path):
 
     train_df = pd.read_csv(train_in_path)
 
     X_train, y_train = train_df.drop(columns=["is_default"]), train_df["is_default"]
 
-    preprocessor = pickle.load(open(preprocessor_in_path, "r"))
+    preprocessor = pickle.load(open(preprocessor_in_path, "rb"))
 
     models = define_models(preprocessor)
 
@@ -111,7 +119,7 @@ def main(train_in_path, preprocessor_in_path, results_out_path, model_out_path):
         results = train(results, model_name, model, X_train, y_train)
         print(model_name, "done!\n")
     
-    results = train_averaging_models(models, results, )
+    results = train_averaging_models(models, results, X_train, y_train)
     
     print("Saving results!\n\n")
     save_csv(results, results_out_path, filename="/selected_results.csv")
@@ -119,4 +127,5 @@ def main(train_in_path, preprocessor_in_path, results_out_path, model_out_path):
     
 
 if __name__ == "__main__":
-    main(opt["train_in_path"], opt["preprocessor_out_path"], opt["results_out_path"])
+    opt = docopt(__doc__)
+    main(opt["--train_in_path"], opt["--preprocessor_in_path"], opt["--results_out_path"])
